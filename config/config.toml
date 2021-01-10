@@ -1,0 +1,28 @@
+###
+# amaterasu configuration
+###
+
+# general information about the server
+# database information is in the mysql.toml file
+[general]
+domain = "katagiri.ga" # the domain of the server to use alongside *.ppy.sh
+free_supporter = true # whether or not to make the ingame osu!supporter privileges free for everyone, or not
+
+# user oriented configurations
+# use these to forbid specific names or passwords
+# all of these here will be hardcoded into the server
+
+# for things like names, preferrably keep lowercase as the server automatically checks over lowercase
+[users]
+banned_names = [ # add names that the user cannot register with
+    "suigintou", # you cannot be me
+    "peppy",
+    "cookiezi",
+    "rrtyui"
+]
+
+
+# INTERNAL DATA
+# please don't change any of this, as it exists for internal stuff, or something.
+[_internal]
+verion = "0.1.0"

@@ -1,0 +1,25 @@
+{
+  "name": "amaterasu",
+  "version": "0.1.0",
+  "description": "",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kuragarimoe/amaterasu.git"
+  },
+  "author": "Ausakura",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/kuragarimoe/amaterasu/issues"
+  },
+  "homepage": "https://github.com/kuragarimoe/amaterasu#readme",
+  "dependencies": {
+    "bcrypt": "^5.0.0",
+    "int64-buffer": "^1.0.0",
+    "mysql2": "^2.2.5",
+    "toml": "^3.0.0"
+  }
+}
