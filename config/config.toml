@@ -25,4 +25,4 @@ banned_names = [ # add names that the user cannot register with
 # INTERNAL DATA
 # please don't change any of this, as it exists for internal stuff, or something.
 [_internal]
-verion = "0.1.0"
+version = "0.1.0"

@@ -21,5 +21,8 @@
     "int64-buffer": "^1.0.0",
     "mysql2": "^2.2.5",
     "toml": "^3.0.0"
+  },
+  "devDependencies": {
+    "nanotimer": "^0.3.15"
   }
 }
