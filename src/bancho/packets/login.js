@@ -1,5 +1,5 @@
 const { Type } = require("../../util/Constants");
-const Packet = require("../Packet")
+const Packet = require("../Packet");
 
 /// users packets
 //  responses:
@@ -14,7 +14,7 @@ const Packet = require("../Packet")
 // everything else is a valid id
 
 module.exports = (response) => {
-    let packet = new Packet(5);
+    let packet = new Packet().id(5);
     packet.write(response, Type.Int);
 
     // return packet
