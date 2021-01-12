@@ -2,8 +2,6 @@ class RoleMap {
     constructor(roles) {
         // filter
         this.roles = glob.roles.filter((r) => roles.includes(r.id.toString()))
-
-        console.log(this.roles)
     }
 
     /**

@@ -21,6 +21,10 @@ class Response {
     }
 
     send(msg) {
+        if (msg instanceof Array) {
+            msg = Buffer.concat(msg)
+        }
+
         this._res.writeHead(this.status_code).end(msg);
     }
 

@@ -88,4 +88,22 @@ router.handle("/users", ["POST"], async (req, res) => {
     res.send("ok");
 });
 
+// bancho-connect.php
+router.handle("/web/bancho_connect.php", ["POST"], (req, res) => {
+    res.send("hi!");
+})
+
+// osu-getfriends.php
+router.handle("/web/osu-getfriends.php", ["GET"], (req, res) => {
+    // TODO: actually make it lol
+    res.send("");
+})
+// lastfm.php
+router.handle("/web/lastfm.php", ["GET"], (req, res) => {
+    // TODO: actually make it lol
+    res.send("-3");
+})
+
+
+
 module.exports = router;
