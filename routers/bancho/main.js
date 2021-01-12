@@ -144,13 +144,13 @@ async function login(data, ip) {
         glob.packets.login(plyr.id),
         glob.packets.protocol(19),
         glob.packets.bancho_privs(plyr.bancho_privileges()),
-        glob.packets.notification(`Welcome to osu!katagiri!\nEnjoy your stay. (\´･ω･\`)\nServer Version: ${glob.config._internal.version}`),
+        glob.packets.notification(`Welcome to osu!katagiri!\nEnjoy your stay. (\´･ω･\`)\n\nServer Version: ${glob.config._internal.version}`),
         glob.packets.channels.end() // ???
     ];
 
     // setup player info and stats
     await plyr.get_stats();
-
+    
     // join channels
     for (let channel of glob.channels) {
         // have to resend packet anyways, otherwise the client will try to join again.

@@ -46,12 +46,14 @@ class Packet {
             if (data == null || data == "") {
                 resp = Buffer.from([0]);
             } else {
-                let data_buffer = Buffer.from(data, "utf-8");
-                let buffer = Buffer.alloc(2); // make the buffer
+                let data_buffer = Buffer.from(data, "utf-8"); // data to a utf8 buffer
+                let buffer = Buffer.alloc(1); // make the base of the uffer
                 buffer.writeUInt8(0x0B, 0); // write base byte
-                buffer.writeUInt8(data_buffer.length, 1); // write length byte
 
-                resp = Buffer.concat([buffer, data_buffer]);
+                // length buffer
+                let length = Buffer.from(writeULEB128(data_buffer.length));
+
+                resp = Buffer.concat([buffer, length, data_buffer]);
             }
         } else {
             // everything else
@@ -76,7 +78,7 @@ class Packet {
             resp = buffer;
         }
 
-        this.offset += size;
+        this.offset += resp.length + 1;
         this.buffer = Buffer.concat([this.buffer, resp]);
         return this;
     }
@@ -99,11 +101,12 @@ class Packet {
         if (type == Type.String) {
             if (this.buffer[this.offset] == 0x0B) { // string
                 // get the length of the string
-                let length = this.buffer[this.offset += 1];
+                let length = readULEB128(this.buffer.slice(this.offset += 1));
 
                 // return the data
-                data = this.buffer.slice(this.offset += 1, length + 2).toString();
-                this.offset = length + 2;
+                data = this.buffer.slice(this.offset += length.length, this.offset + length.value).toString();
+                
+                this.offset += length.value;
             } else { // no string
                 this.offset++;
                 data = null;
@@ -116,7 +119,6 @@ class Packet {
                 data = parseInt(this.buffer.slice(this.offset, this.offset += byte_size).reverse().toString("hex"), 16);
             }
         }
-
         return data;
     }
 
@@ -151,7 +153,25 @@ class Packet {
     }
 }
 
-function ULEB128(num) {
+function readULEB128(arr) {
+    var total = 0;
+    var shift = 0;
+    var len = 0;
+
+    while (true) {
+        var byte = arr[len];
+        len++;
+        total |= ((byte & 0x7F) << shift);
+        if ((byte & 0x80) === 0) break;
+        shift += 7;
+    }
+
+    return {
+        value: total,
+        length: len
+    };
+}
+function writeULEB128(num) {
     var arr = [];
     var len = 0;
 
@@ -164,7 +184,7 @@ function ULEB128(num) {
         len++;
     }
 
-    return arr;
+    return Buffer.from(arr);
 }
 
 function getSize(type, data) {

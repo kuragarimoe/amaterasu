@@ -41,3 +41,8 @@ for (let file of fs.readdirSync(__dirname + "/../src/bancho/packets")) {
 
 // handled
 glob.handled = [];
+
+// cmyui-fy (debug)
+glob.to_python = (packet) => {
+    return packet.join("\\x").split("\\x").map(c => c = `\\x${parseInt(c).toString(16).padStart(2, "0")}`).join("");
+}

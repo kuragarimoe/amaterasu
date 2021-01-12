@@ -21,9 +21,10 @@ module.exports.info = (channel) => {
     // write info
     packet.write(channel.full_name, Type.String);
     packet.write(channel.description, Type.String);
-    packet.write(channel.players.size, Type.Int);
+    packet.write(channel.players.size, Type.Short);
 
     // return packet
+    console.log(glob.to_python(packet.pack()))
     return packet.pack();
 }
 

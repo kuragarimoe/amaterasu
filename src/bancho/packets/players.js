@@ -16,7 +16,7 @@ module.exports.stats = (player) => {
     packet.write(player.status.action, Type.Byte); // what is the player doing?
     packet.write(player.status.info, Type.String); // ???
     packet.write(player.status.map.md5, Type.String); // md5 of the current map
-    packet.write(player.status.map.md5, Type.Int); // user's mod values
+    packet.write(player.status.mods, Type.Int); // user's mod values
     packet.write(player.status.mode, Type.Byte); // the mode the user is playing right now
     packet.write(player.status.map.id, Type.Int); // map id
     packet.write(stats.rscore, Type.Long); // ranked score
