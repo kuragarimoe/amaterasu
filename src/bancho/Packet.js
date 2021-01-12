@@ -1,165 +1,174 @@
 const Int64 = require("int64-buffer").Int64LE;
 const UInt64 = require("int64-buffer").Uint64LE;
-const { Type } = require("./../util/Constants")
+const { Type } = require("../util/Constants");
 
 class Packet {
-    constructor(id, data) {
-        this.id = id || 0;
-        this.data = data || [];
+    constructor(buffer = "") {
+        this.buffer = Buffer.from(buffer);
+
+        this.offset = 0;
+
+        // read the ID from the given buffer, if any
+        if (buffer) {
+            this._id = parseInt(this.buffer.slice(0, 2).reverse().toString("hex"), 16); // first 2 bytes is the ID
+            this.buffer = buffer.slice(7); // create a buffer from the rest of the buffer
+        }
+    }
+
+    get length() {
+        return this.buffer.length;
+    }
+
+    /**
+     * Sets the ID of the packet.
+     * @param {Number} id The ID of the packet toset.
+     */
+    id(id) {
+        if (!id) return this._id;
+
+        this._id = id;
+        return this;
     }
 
     write(data, type) {
-        this.data.push({
-            type,
-            data
-        })
-    }
+        if (!typeof type == "number") { // is not a number
+            if (!Type[type])
+                throw new RangeError("The given type is not a very valid type.");
 
-    pack(id = this.id) {
-        let offset = 7;
-
-        // get the size of the overall packet
-        let size = this.data.reduce((acc, current) => {
-            return acc + getSize(current.type, current.data);
-        }, 0);
-
-        // create a packet with the gotten size
-        let packet = Buffer.alloc(7 + size); // offset 7, as the first 7 bytes are packet headers.
-
-        // write base data
-        packet.writeInt16LE(id, 0); // packet id
-        packet.writeInt8(0x00, 2); // empty placeholder for old data (unused)
-        packet.writeInt32LE(size, 3); // data_size
-
-        // write data, fuckily
-        for (let p of this.data) {
-            if (p.type == Type.String) {
-                packString(p.data).copy(packet, offset);
-            } else if (p.type == Type.Byte) {
-                packet[offset] = p.data;
-            } else if (p.type == Type.Int) {
-                packet.writeInt32LE(p.data, offset);
-            } else if (p.type == Type.UInt) {
-                packet.writeUInt32LE(p.data, offset);
-            } else if (p.type == Type.Short) {
-                packet.writeInt16tLE(p.data, offset);
-            } else if (p.type == Type.UShort) {
-                packet.writeUInt16LE(p.data, offset);
-            } else if (p.type == Type.Float) {
-                packet.writeFloatLE(p.data, offset);
-            } else if (p.type == Type.Long) {
-                new Int64(p.data).toBuffer().copy(packet, offset);
-            } else if (p.type == Type.ULong) {
-                new UInt64(p.data).toBuffer().copy(packet, offset);
-            } else if (p.type == Type.Raw) {
-                new Buffer.from(p.data).copy(packet, offset);
-            }
-
-            // move offset
-            offset += getSize(p.type, p.data);
+            type = Type[type];
         }
 
-        return packet;
-    }
+        let resp = null;
+        let size = getSize(type, data);
 
-    // template engine stolen from shiori (will attempt to rework later.)
-    static template(data, template = []) {
-        let obj = {};
-        let offset = 0;
-
-        template.forEach(x => {
-            let newdata = data.slice(offset);
-
-            if (x.type === Type.ArrayOfValues) {
-                x.template.forEach(template => {
-                    !obj[x.parameter] && (obj[x.parameter] = []);
-                    for (let i = 0; i < x.length; i++) {
-                        !obj[x.parameter][i] && (obj[x.parameter][i] = {});
-                        if (template.condition != undefined) {
-                            obj[x.parameter][i][template.parameter] = template.condition(parse(newdata, template).data, obj, i) == false ? parse(newdata, template).data : null; // run condition then evaluate the contents.
-                            offset += template.condition(parse(newdata, template).data, obj, i) == false ? parse(newdata, template).offset : 1;
-                        } else {
-                            obj[x.parameter][i][template.parameter] = parse(newdata, template).data;
-                            offset += parse(newdata, template).offset;
-                            newdata = data.slice(offset);
-                        }
-                    }
-                });
-                return;
-            }
-
-            if (x.condition == undefined) {
-                obj[x.parameter] = parse(newdata, x).data;
-                offset += parse(newdata, x).offset;
+        // special case for strings
+        if (type == Type.String) {
+            if (data == null || data == "") {
+                resp = Buffer.from([0]);
             } else {
-                obj[x.parameter] = x.condition(parse(newdata, x).data, obj) == true ? parse(newdata, x).data : null; // run condition then evaluate the contents.
-                offset += x.condition(parse(newdata, x).data, obj) == true ? parse(newdata, x).offset : 0;
+                let data_buffer = Buffer.from(data, "utf-8");
+                let buffer = Buffer.alloc(2); // make the buffer
+                buffer.writeUInt8(0x0B, 0); // write base byte
+                buffer.writeUInt8(data_buffer.length, 1); // write length byte
+
+                resp = Buffer.concat([buffer, data_buffer]);
             }
-        });
-
-        return obj;
-    }
-}
-
-function parse(value, p) {
-    let offset = 0;
-    let data = null;
-
-    if (p.type == Type.String) {
-        data = readString(value, 0);
-        offset += data == null ? 1 : data.length + 2;
-    } else if (p.type == Type.Byte) {
-        data = value[offset];
-        offset += 1;
-    } else if (p.type == Type.Int) {
-        data = value.readIntLE();
-        offset += 4;
-    } else if (p.type == Type.UInt) {
-        data = value.readUIntLE();
-        offset += 4;
-    } else if (p.type == Type.Short) {
-        data = value.readShortLE();
-        offset += 2;
-    } else if (p.type == Type.UShort) {
-        data = value.readUShortLE();
-        offset += 2;
-    } else if (p.type == Type.Float) {
-        data = value.readFloatLE();
-        offset += 4;
-    } else if (p.type == Type.Long) {
-        data = new Long(value);
-        offset += 8;
-    } else if (p.type == Type.ULong) {
-        data = new ULong(value);
-        offset += 8;
-    } else if (p.type == Type.Raw) {
-        data = new Buffer.from(value);
-        offset += data.length;
-    }
-
-    return { data, offset };
-}
-
-function readString(packet, offset) {
-    let p = packet.slice(offset);
-
-    if (p[0] == 0x00) { // no string
-        return null;
-    } else if (p[0] == 0x0B) { // there is a string
-        if (p[1] == 0x00) { // empty length
-            return "";
         } else {
-            return p.slice(2, 2 + p[1]).toString();
+            // everything else
+            let buffer = Buffer.alloc(size);
+
+            if (type == Type.Float) { // float
+                buffer.writeFloatLE(data, 0, size);
+            } else if (type == Type.ULong || type == Type.Long) { // ulong/long
+                if (type == Type.Long) {
+                    new Int64(data).toBuffer().copy(buffer, 0);
+                } else {
+                    new UInt64(data).toBuffer().copy(buffer, 0);
+                }
+            } else if (type == Type.UInt || type == Type.UShort) { // unsigned
+                buffer.writeUIntLE(data, 0, size);
+            } else if (type == Type.Raw) {
+                new Buffer.from(data).copy(buffer, this.offset);
+            } else { // signed
+                buffer.writeIntLE(data, 0, size);
+            }
+
+            resp = buffer;
         }
-    } else {
-        return ReadString(packet, offset + 1);
+
+        this.offset += size;
+        this.buffer = Buffer.concat([this.buffer, resp]);
+        return this;
     }
+
+    /**
+     * Read a specific given byte type.
+     * @param {Number|Type} type The type to read, or the size to read.
+     */
+    read(type) {
+        if (!typeof type == "number") { // is not a number
+            if (!Type[type])
+                throw new RangeError("The given type is not a very valid type.");
+
+            type = Type[type];
+        }
+
+        let data = null;
+
+        // special case for strings
+        if (type == Type.String) {
+            if (this.buffer[this.offset] == 0x0B) { // string
+                // get the length of the string
+                let length = this.buffer[this.offset += 1];
+
+                // return the data
+                data = this.buffer.slice(this.offset += 1, length + 2).toString();
+                this.offset = length + 2;
+            } else { // no string
+                this.offset++;
+                data = null;
+            }
+        } else { // everything else
+            if (type == Type.Raw) {
+                data = this.buffer;
+            } else {
+                let byte_size = getSize(type);
+                data = parseInt(this.buffer.slice(this.offset, this.offset += byte_size).reverse().toString("hex"), 16);
+            }
+        }
+
+        return data;
+    }
+
+    pack(_id = this.id()) {
+        let startBuffer = Buffer.alloc(7);
+
+        // write length and id to start buffer
+        startBuffer.writeInt16LE(_id, 0); // packet id
+        startBuffer.writeInt32LE(this.length, 3);
+
+        // return full buffer
+        glob.handled.push({ id: _id })
+        return Buffer.concat([startBuffer, this.buffer]);
+    }
+
+    toString() {
+        let values = [];
+        for (let value of this.pack().values()) {
+            values.push(value.toString(16).padStart(2, "0"))
+        }
+
+        return `<Packet ${values.join(" ")}>`
+    }
+
+    static template(data, template = []) {
+        let resp = {};
+        let packet = new Packet(data);
+
+        for (let templ of template) {
+            resp[templ.key] = data.read()
+        }
+    }
+}
+
+function ULEB128(num) {
+    var arr = [];
+    var len = 0;
+
+    if (num === 0)
+        return [0];
+
+    while (num > 0) {
+        arr[len] = num & 0x7F;
+        if (num >>= 7) arr[len] |= 0x80;
+        len++;
+    }
+
+    return arr;
 }
 
 function getSize(type, data) {
-    if (type == Type.String) {
-        return packString(data).length;
-    } else if (type == Type.Byte) {
+    if (type == Type.Byte) {
         return 1;
     } else if (type == Type.Raw) {
         return data.length;
@@ -174,35 +183,6 @@ function getSize(type, data) {
     }
 
     return 0;
-}
-
-function encodeULEB128(num) {
-    if (num == 0) return new Buffer.from(0x00);
-
-    let arr = new Buffer.alloc(16);
-    let length = 0;
-    let offset = 0;
-
-    while (num > 0) {
-        arr[offset] = num & 127;
-        offset += 1;
-        num = num >> 7;
-        num != 0 && (arr[length] = arr[length] | 128);
-        length += 1;
-    }
-
-    return arr.slice(0, length);
-}
-
-function packString(str) {
-    if (str == null || str == '') {
-        return new Buffer.from([0x00]);
-    } else {
-        return new Buffer.concat([new Buffer.from([0x0B]),
-        encodeULEB128(str.length),
-        new Buffer.from(str)
-        ]);
-    }
 }
 
 module.exports = Packet;
