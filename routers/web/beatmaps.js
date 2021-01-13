@@ -101,8 +101,12 @@ const router = new Router().domain("osu.ppy.sh");
 // the thing that continues on and on till all metadata entries are read.
 // this will come after the amount of metadata entries.
 
-// type*5 *6  beatmap id
+// type*5 len beatmap id
 // 09 00  07  31 33 34 36 38 33 30
+// 0          4?
+
+// type*5 len beatmap id
+// 01 00  0B  41 72 69 61 62 6C 27 65 79 65 53
 // 0          4?
 
 //// SIDENOTES:
@@ -137,7 +141,6 @@ const router = new Router().domain("osu.ppy.sh");
 //     Revision, // 21
 //     PackId // 22
 // }
-// *6 = i don't actually know what this random byte is here for
 
 // #TODO: beatmap submission.
 
