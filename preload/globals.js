@@ -4,6 +4,7 @@ const mysql = require("mysql2/promise");
 const PlayerMap = require("../src/structures/bancho/PlayerMap");
 const Channel = require("../src/structures/bancho/Channel");
 const DatabaseHandler = require("../src/handlers/DatabaseHandler");
+const CacheStorage = require("../src/util/CacheStorage");
 
 let mysql_cfg = toml.parse(fs.readFileSync(__dirname + "/../config/mysql.toml"));
 let cfg = toml.parse(fs.readFileSync(__dirname + "/../config/config.toml"));
@@ -14,6 +15,9 @@ global.glob = {};
 // database and config
 glob.config = cfg;
 glob.db = new DatabaseHandler(mysql.createPool(mysql_cfg.database));
+
+// cache
+glob.cache = new CacheStorage();
 
 // lists and structures
 glob.players = new PlayerMap();

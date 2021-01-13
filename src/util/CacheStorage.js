@@ -37,6 +37,10 @@ class Cache {
         this.pairs = new Map();
     }
 
+    get(key) {
+        return this.pairs.get(key);
+    }
+
     set(key, value, expiry = 0) {
         this.pairs.set(key, {
             value,
