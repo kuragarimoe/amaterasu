@@ -114,10 +114,25 @@ async function login(data, ip) {
     if (!users[0])
         return [glob.packets.login(-1), "0"];
 
+    // get scrypt cache
+    let scrypt = glob.cache.store("scrypt");
+
     // compare passwords.
     let user = users[0];
-    if (!Hash.verify(password_hash, user.password_hash))
-        return [glob.packets.login(-1), "0"];
+
+    // efficient checking.
+    if (scrypt.get(password_hash)) {
+        console.log("subsequent login")
+        if (!scrypt.get(password_hash).value == password_hash) {
+            return [glob.packets.login(-1), "0"];
+        }
+    } else {
+        console.log("first login")
+        if (!Hash.verify(password_hash, user.password_hash))
+            return [glob.packets.login(-1), "0"];
+        scrypt.set(password_hash, password_hash)
+    }
+
 
     user.roles = new RoleMap(user.roles.split(","));
 
@@ -150,7 +165,7 @@ async function login(data, ip) {
 
     // setup player info and stats
     await plyr.get_stats();
-    
+
     // join channels
     for (let channel of glob.channels) {
         // have to resend packet anyways, otherwise the client will try to join again.
@@ -181,7 +196,7 @@ function parsePacket(data) {
     while (offset < data.length) {
         let id = parseInt(Buffer.from(data.slice(offset, offset + 2)).reverse().toString("hex"), 16);
         let length = parseInt(Buffer.from(data.slice(offset + 3, offset + 7)).reverse().toString("hex"), 16);
-    
+
         let packet = new Packet(data.slice(offset, (offset + 7) + length));
 
         packets.push({

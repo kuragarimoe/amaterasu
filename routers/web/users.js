@@ -98,12 +98,11 @@ router.handle("/web/osu-getfriends.php", ["GET"], (req, res) => {
     // TODO: actually make it lol
     res.send("");
 })
+
 // lastfm.php
 router.handle("/web/lastfm.php", ["GET"], (req, res) => {
     // TODO: actually make it lol
     res.send("-3");
-})
-
-
+});
 
 module.exports = router;
