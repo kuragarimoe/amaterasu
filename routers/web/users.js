@@ -69,7 +69,7 @@ router.handle("/users", ["POST"], async (req, res) => {
             \`email\`, 
             \`register_time\`,
              \`last_activity\`, 
-             \`ranks\`, 
+             \`roles\`, 
              \`password_version\`
             ) 
         VALUES (NULL, ?, ?, ?, ?, ?, ?, '18', '1')

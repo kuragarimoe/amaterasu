@@ -24,7 +24,6 @@ module.exports.info = (channel) => {
     packet.write(channel.players.size, Type.Short);
 
     // return packet
-    console.log(glob.to_python(packet.pack()))
     return packet.pack();
 }
 

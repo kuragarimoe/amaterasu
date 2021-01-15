@@ -18,6 +18,14 @@ class Router {
 
         return this;
     }
+
+    merge(router) {
+        for (let route of router.routes) {
+            this.routes.push(route)
+        }
+
+        return;
+    }
 }
 
 module.exports = Router;
