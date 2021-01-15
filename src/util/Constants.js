@@ -28,7 +28,7 @@ exports.Mods = {
 	Flashlight: 1 << 10,
 	Autoplay: 1 << 11,
 	SpunOut: 1 << 12,
-	Relax2: 1 << 13,
+	Autopilot: 1 << 13,
 	Perfect: 1 << 14,
 	Key4: 1 << 15,
 	Key5: 1 << 16,
