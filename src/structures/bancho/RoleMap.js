@@ -4,6 +4,10 @@ class RoleMap {
         this.roles = glob.roles.filter((r) => roles.includes(r.id.toString()))
     }
 
+    get(id) {
+        return this.roles.find(r => r.id == id || r.name == id);
+    }
+
     /**
      * Compares a privilege against all the roles in this list.
      */
