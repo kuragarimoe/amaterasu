@@ -6,7 +6,16 @@
 # database information is in the mysql.toml file
 [general]
 domain = "katagiri.ga" # the domain of the server to use alongside *.ppy.sh
-free_supporter = true # whether or not to make the ingame osu!supporter privileges free for everyone, or not
+
+# whether or not to make the ingame osu!supporter privileges free for everyone, or not
+free_supporter = true 
+
+# the prefix of the main bot
+bot_prefix = "!"
+
+# osu!api key
+osu_api = ""
+
 
 # user oriented configurations
 # use these to forbid specific names or passwords
