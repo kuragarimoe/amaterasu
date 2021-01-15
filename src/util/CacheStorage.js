@@ -60,6 +60,11 @@ class Cache {
 
         return this;
     }
+
+    // make the cache iterable
+    *[Symbol.iterator]() {
+        return this.pairs[Symbol.iterator]
+    }
 }
 
 module.exports = CacheStorage
