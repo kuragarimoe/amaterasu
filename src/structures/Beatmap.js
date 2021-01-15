@@ -3,5 +3,7 @@ class Beatmap {
 
     }
 
-    static from(id, md5)
+    static from(id, md5) {
+        
+    }
 }
