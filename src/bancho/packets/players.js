@@ -8,24 +8,43 @@ const Packet = require("../Packet")
 module.exports.stats = (player) => {
     let packet = new Packet().id(11);
 
+    if (player.bot) { // bot accounts are special
+        packet.write(player.id, Type.Int)
+            .write(4, Type.Byte)
+            .write("some content...", Type.String)
+            .write("", Type.String) 
+            .write(0, Type.Int)
+            .write(0, Type.Byte)
+            .write(0, Type.Int)
+            .write(0, Type.Long)
+            .write(0, Type.Float)
+            .write(0, Type.Int)
+            .write(0, Type.Long)
+            .write(0, Type.Int)
+            .write(0, Type.Short);
+
+        // pack bot data
+        return packet.pack();
+    }
+
     // player stats
     let stats = player.stats();
 
     // write data
-    packet.write(player.id, Type.Int); // player id
-    packet.write(player.status.action, Type.Byte); // what is the player doing?
-    packet.write(player.status.info, Type.String); // ???
-    packet.write(player.status.map.md5, Type.String); // md5 of the current map
-    packet.write(player.status.mods, Type.Int); // user's mod values
-    packet.write(player.status.mode, Type.Byte); // the mode the user is playing right now
-    packet.write(player.status.map.id, Type.Int); // map id
-    packet.write(stats.rscore, Type.Long); // ranked score
-    packet.write(stats.acc, Type.Float); // accuracy
-    packet.write(stats.plays, Type.Int); // play count
-    packet.write(stats.tscore, Type.Long); // total score
-    packet.write(player.rank || 0, Type.Long); // player rank
-    packet.write(stats.pp || 0, Type.Short); // pp; why is pp a short?
-    
+    packet.write(player.id, Type.Int) // player id
+        .write(player.status.action, Type.Byte) // what is the player doing?
+        .write(player.status.info, Type.String) // ???
+        .write(player.status.map.md5, Type.String) // md5 of the current map
+        .write(player.status.mods || 0, Type.Int) // user's mod values
+        .write(player.status.mode, Type.Byte) // the mode the user is playing right now
+        .write(player.status.map.id, Type.Int) // map id
+        .write(stats.rscore, Type.Long) // ranked score
+        .write(stats.acc, Type.Float) // accuracy
+        .write(stats.plays, Type.Int) // play count
+        .write(stats.tscore, Type.Long) // total score
+        .write(player.rank || 0, Type.Int) // player rank
+        .write(stats.pp || 0, Type.Short); // pp; why is pp a short?
+
     // pack data
     return packet.pack();
 }
@@ -34,16 +53,30 @@ module.exports.stats = (player) => {
 // packet id: 83
 module.exports.presence = (player) => {
     let packet = new Packet().id(83);
-    
+
+    if (player.bot) { // bots
+        packet.write(player.id, Type.Int) // player id
+            .write(player.username, Type.String) // player name
+            .write(-8 + 24, Type.Byte) // utc offset
+            .write(0, Type.Byte) // country integer (will figure out later)
+            .write(player.bancho_privileges(), Type.Byte)
+            .write(0.00, Type.Float) // Longitude
+            .write(0.00, Type.Float) // Latitude
+            .write(1, Type.Int); // Player Rank
+
+        // return bot packet
+        return packet.pack();
+    }
+
     // write data
-    packet.write(player.id, Type.Int); // player id
-    packet.write(player.username, Type.String); // player name
-    packet.write(player.utc_offset + 24, Type.Byte) // utc offset
-    packet.write(0, Type.Byte); // country integer (will figure out later)
-    packet.write(player.bancho_privileges(), Type.Byte);
-    packet.write(0.00, Type.Float) // Longitude
-    packet.write(0.00, Type.Float) // Latitude
-    packet.write(player.rank || 0, Type.Float) // Player Rank
+    packet.write(player.id, Type.Int) // player id
+        .write(player.username, Type.String) // player name
+        .write(player.utc_offset + 24, Type.Byte) // utc offset
+        .write(0, Type.Byte) // country integer (will figure out later)
+        .write(player.bancho_privileges(), Type.Byte)
+        .write(0.00, Type.Float) // Longitude
+        .write(0.00, Type.Float) // Latitude
+        .write(player.rank || 0, Type.Int); // Player Rank
 
     // pack data
     return packet.pack();
