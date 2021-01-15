@@ -23,7 +23,10 @@ class HttpServer {
                     let router = require(path.join(dir, file));
                     router._server = srv;
 
-                    srv._routers.push(router);
+                    let isThere = srv._routers.find(r => String(r._domain) === String(router._domain));
+                    if (isThere) {
+                        isThere.merge(router);
+                    } else srv._routers.push(router);
                 }
             }
         })(this, path.join(__dirname, "/../../routers"));

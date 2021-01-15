@@ -2,7 +2,10 @@ class Request {
     constructor(_req) {
         this._req = _req;
 
+        this.path = _req.path;
+
         this.headers = _req.headers;
+
         this.packets = [];
 
         this.body = {};

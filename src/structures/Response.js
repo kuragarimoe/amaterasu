@@ -20,6 +20,10 @@ class Response {
         return this;
     }
 
+    serve(buffer, type) {
+        this.header("content-type", type).send(buffer);
+    }
+
     send(msg) {
         if (msg instanceof Array) {
             msg = Buffer.concat(msg)
