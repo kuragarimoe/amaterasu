@@ -56,7 +56,7 @@ module.exports.presence = (player) => {
 
     if (player.bot) { // bots
         packet.write(player.id, Type.Int) // player id
-            .write(player.username, Type.String) // player name
+            .write(player.name, Type.String) // player name
             .write(-8 + 24, Type.Byte) // utc offset
             .write(0, Type.Byte) // country integer (will figure out later)
             .write(player.bancho_privileges(), Type.Byte)
@@ -70,7 +70,7 @@ module.exports.presence = (player) => {
 
     // write data
     packet.write(player.id, Type.Int) // player id
-        .write(player.username, Type.String) // player name
+        .write(player.name, Type.String) // player name
         .write(player.utc_offset + 24, Type.Byte) // utc offset
         .write(0, Type.Byte) // country integer (will figure out later)
         .write(player.bancho_privileges(), Type.Byte)
@@ -85,7 +85,7 @@ module.exports.presence = (player) => {
 // send message
 // packet id: 7
 module.exports.send = (player, message, channel) => {
-    let packet = new Packet().id(12);
+    let packet = new Packet().id(7);
 
     // write data
     packet.write(player.name, Type.String); // player name

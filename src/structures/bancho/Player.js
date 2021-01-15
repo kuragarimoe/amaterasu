@@ -38,13 +38,13 @@ class Player {
          * The username of the player
          * @type {string}
          */
-        this.username = data.username;
+        this.name = data.username;
 
         /**
          * A safer form of the username (with underscores)
          * @type {string}
          */
-        this.safe_username = data.safe_username;
+        this.safe_name = data.safe_username;
 
         // theres extra data, we gotta do stuff with it.
         if (extra) {
@@ -147,8 +147,9 @@ class Player {
 
 
     /// REQUESTS ///
-    send(message, channel) {
-        this.enqueue()
+    send(message, player) {
+        // send a player to self
+        this.enqueue(glob.packets.players.send(player, message, this))
     }
 
     /**
@@ -235,6 +236,11 @@ class Player {
     }
 
     /// PACKET HANDLING ///
+    
+    get online() {
+        // return online whether the player has a token listed or the last ping was within 10 seconds
+        return this.token != "" || (Date.now() - this.last_recv_time) < 10e3;
+    }
 
     /**
      * Returns whether or not the packet queue is empty or not.

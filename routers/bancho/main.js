@@ -98,7 +98,7 @@ async function login(data, ip) {
     let login_time = Date.now();
 
     // TODO: log out current player if any
-    let player = glob.players.find(f => f.safe_username == username.replace(" ", "_").toLowerCase());
+    let player = glob.players.find(f => f.safe_name == username.replace(" ", "_").toLowerCase());
     if (player) {
         if ((login_time - player.last_recv_time) > 10e3) {
             await player.logout(); // logout

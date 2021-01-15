@@ -19,6 +19,17 @@ class PlayerMap extends Map {
         return super.get(id);
     }
 
+    get_login(un, pw) {
+        let user = this.find(p => p.name == un);
+        let scrypt = glob.cache.store("scrypt");
+
+        if (!user) // no user online
+            return null;
+
+        if (scrypt.get(pw).value == pw)
+            return user;
+    }
+
     /**
      * Adds a new player to the map.
      * @arg {Player} player The player to add.
