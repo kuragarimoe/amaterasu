@@ -4,5 +4,6 @@ module.exports = {
     1: require("./requests/SendMessage"),
     2: require("./requests/Logout"),
     3: require("./requests/UserStatusUpdate"),
-    79: require("./requests/RecieveUpdates")
+    25: require("./requests/SendPrivateMessage"),
+    79: require("./requests/RecieveUpdates"),
 }
