@@ -64,13 +64,13 @@ class HttpServer {
             return res.end("Not Found.");
         }
 
+        // set data
+        req.query = url.searchParams;
+        req.querystring = url.search;
+
         // hnadle requests
         let _req = new Request(req);
         let _res = new Response(res);
-
-        // set data
-        _req.query = url.searchParams;
-        _req.querystring = url.search;
 
         let handled = false;
         req.on("data", async chunk => {

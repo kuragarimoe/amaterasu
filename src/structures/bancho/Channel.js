@@ -11,9 +11,16 @@ class Channel {
         this.players = new PlayerMap();
     }
 
-    enqueue(packet) {
-        for (let player in this.players.values()) {
-            player.enqueue(packet);
+    get full_name() {
+        return "#" + this.name;
+    }
+    
+    enqueue(packet, sender) {
+        for (let player of this.players.values()) {
+            if (sender) {
+                if (sender.name == player.name) {} // don't send to self
+                else player.enqueue(packet);
+            } else player.enqueue(packet);
         }
 
         return this;
@@ -34,13 +41,9 @@ class Channel {
     }
 
     send(message, sender) {
-        this.enqueue(glob.packets.players.send(sender, message, this))
+        this.enqueue(glob.packets.players.send(sender, message, { name: this.full_name }), sender)
 
         return this;
-    }
-
-    get full_name() {
-        return "#" + this.name;
     }
 }
 

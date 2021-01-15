@@ -8,13 +8,17 @@ class Request {
 
         this.packets = [];
 
+        this.query = _req.query ? toObject(_req.query.entries()) : {};
+
         this.body = {};
     }
 
-    validate(against) {
+    validate(against, body = this.body) {
         let result = true;
         for (let key of against) {
-            if (!this.body[key]) result = false;
+            if (typeof body == "object") {
+                if (body[key] == null) result = false;
+            }
         }
 
         return result;
@@ -34,6 +38,22 @@ class Request {
             }
         }
     }
+}
+
+function toObject(usp) {
+    let res = {};
+
+    for (let [name, value] of usp) {
+        // types
+        if (/[^a-zA-Z]/.test(value)) { // number
+            if (!isNaN(parseInt(value))) {// second verification
+                res[name] = parseInt(value);
+            } else res[name] = value;
+        } else res[name] = value;
+        
+    }
+
+    return res;
 }
 
 module.exports = Request;
