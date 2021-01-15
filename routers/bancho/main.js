@@ -66,13 +66,13 @@ router.handle("/", ["POST", "GET"], async (req, res) => {
             // do nothing lol
             continue;
         } else if (!Packets[p.type]) {
-            console.log(`ERROR: A packet of type ${p.type} was left unhandled.\nData: ${p.data.toJSON().data}`);
+            console.log(`ERROR: A packet of type ${p.type} was left unhandled.\nData: ${p.data.toString()}`);
         } else {
             if (!NO_LOG.includes(p.type))
                 console.log("A packet was handled successfully. (ID: " + p.type + ")")
 
             // construct handler
-            let handler = new Packets[p.type](p.data);
+            let handler = new Packets[p.type](p);
             handler.run(req, resp, player); // then run it
         }
     }
@@ -80,6 +80,8 @@ router.handle("/", ["POST", "GET"], async (req, res) => {
     while (!player.empty()) {
         resp.push(player.dequeue());
     }
+
+    player.last_recv_time = Date.now();
 
     return res.send(resp);
 });
@@ -98,7 +100,11 @@ async function login(data, ip) {
     // TODO: log out current player if any
     let player = glob.players.find(f => f.safe_username == username.replace(" ", "_").toLowerCase());
     if (player) {
-
+        if ((login_time - player.last_recv_time) > 10e3) {
+            await player.logout(); // logout
+        } else {
+            return [[glob.packets.login(-1), glob.packets.notification("There is already a user logged in with this name.")], "0"]
+        }
     }
 
     // login the player.
@@ -122,14 +128,13 @@ async function login(data, ip) {
 
     // efficient checking.
     if (scrypt.get(password_hash)) {
-        console.log("subsequent login")
         if (!scrypt.get(password_hash).value == password_hash) {
             return [glob.packets.login(-1), "0"];
         }
     } else {
-        console.log("first login")
         if (!Hash.verify(password_hash, user.password_hash))
             return [glob.packets.login(-1), "0"];
+
         scrypt.set(password_hash, password_hash)
     }
 
@@ -159,7 +164,7 @@ async function login(data, ip) {
         glob.packets.login(plyr.id),
         glob.packets.protocol(19),
         glob.packets.bancho_privs(plyr.bancho_privileges()),
-        glob.packets.notification(`Welcome to osu!katagiri!\nEnjoy your stay. (\´･ω･\`)\n\nServer Version: ${glob.config._internal.version}`),
+        glob.packets.notification(`Welcome to osu!\nEnjoy your stay. (\´･ω･\`)\n\nServer Version: ${glob.config._internal.version}`),
         glob.packets.channels.end() // ???
     ];
 
@@ -176,14 +181,25 @@ async function login(data, ip) {
         resp.push(glob.packets.channels.info(channel))
     }
 
-    let presence = glob.packets.players.presence(plyr);
-    let stats = glob.packets.players.stats(plyr);
+    let user_data = [glob.packets.players.presence(plyr), glob.packets.players.stats(plyr)];
 
-    resp.push(presence, stats);
+    resp.push(user_data[0], user_data[1]);
+
+    // enqueue players to us
+    for (let p of glob.players.values()) {
+        if (p.id !== 1) { // ignore orin lol
+            p.enqueue(user_data)
+        }
+
+        // enqueue them to us
+        resp.push(glob.packets.players.presence(p), glob.packets.players.stats(p));
+    }
 
     // add player in
-    glob.players.set(plyr.token, plyr);
+    glob.players.add(plyr);
 
+    // okay
+    plyr.login_time = login_time;
     return [resp, plyr.token];
 }
 
@@ -201,9 +217,10 @@ function parsePacket(data) {
 
         packets.push({
             type: id,
-            data: data.slice(offset + 7, (offset + 7) + length),
-            raw: packet
+            data: packet,
+            raw: data.slice(offset + 7, (offset + 7) + length)
         });
+
         offset += (offset + 7) + length;
     }
 
