@@ -1,17 +1,17 @@
 const Packet = require("../Packet");
 
 class SendMessage {
-    constructor(data) {
+    constructor(p) {
         // handle packet
-        this.message = readString(data, 2);
-        this.channel = readString(data, 4 + this.message.length);
+        this.message = readString(p.raw, 2);
+        this.channel = readString(p.raw, 4 + this.message.length);
     }
 
     run(req, res, player) {
         // find the target
         let target = this.channel;
         if (target == "#spectator") {
-
+            // ill do this when i get spectator shit done
         } else
             target = glob.channels.find(c => c.full_name == target);
 

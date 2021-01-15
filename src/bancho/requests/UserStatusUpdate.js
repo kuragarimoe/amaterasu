@@ -1,7 +1,7 @@
 const Packet = require("../Packet");
 
 class UserStatusUpdate {
-    constructor(data) {
+    constructor(p) {
         // handle packet
     }
 
