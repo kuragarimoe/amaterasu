@@ -5,8 +5,6 @@ The official repository for the osu!bancho Server that powers the [osu!katagiri]
 * MySQL
 * Node.js v14+ (Tested on v15, but v14 should work.)
 
-This UI was built to work with [gulag](https://github.com/cmyui/gulag), until a readily made alternative by the creators of Atarashii provide a better solution to work with the UI.
-
 ## Running It
 This repository only exists to serve as a public front to the behind-the-scenes work to how Katagiri works; and to provide an open-source footprint for us to follow and preserve. Nonetheless, our licensing states that running instances of Atarashii and other Kuragari instances and projects are fine; but doing such will have no support from our sides. IF you wish to run a provided instance, then we fully trust that you have the capability to run this website if you were capable enough to setup something like PHP or MySQL.
 
