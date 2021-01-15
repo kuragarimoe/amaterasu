@@ -20,6 +20,21 @@ const router = new Router().domain("osu.ppy.sh");
 // z: osz2 hash (if any)
 // vv: version
 
+// responses:
+// responses are done in a newline fashion (\n)
+// [0]: response code, 0 if success but >0 if error code
+// [1]: beatmapset id (or the error message if any)
+// [2]: beatmap ids set (seperated by ,)
+// [3]: type of submission (1 is new submission, 2 is an update)
+// [4]: remaining beatmaps
+
+// common error codes:
+// 1: the submitter doesn't own the map
+// 3: the map is ranked
+// 4: unsure, but it is used
+// 5: authorization failed, or punished
+// 6: submission limit
+
 // [/web/osu-osz2-bmsubmit-upload.php]: [POST]
 // the beatmap upload, where the osz is submitted
 // parameters:
@@ -30,6 +45,18 @@ const router = new Router().domain("osu.ppy.sh");
 // z: osz2 hash (if any)
 // s: set id
 // osz2: the osz2 file, we will need to properly decompress this.
+
+// responses:
+// responses are done in a newline fashion, sort of.
+// [0]: response code, 0 if success but >0 if error code
+// [1]: the error message, if there is none then exclude this line entirely.
+
+// common error codes:
+// 1: the submitter doesn't own the map
+// 3: the map is ranked
+// 4: unsure, but it is used
+// 5: authorization failed, or punished
+// 6: submission limit
 
 // [/web/osu-osz2-bmsubmit-post.php]: [POST]
 // to post data like description and what not, or something
@@ -101,13 +128,21 @@ const router = new Router().domain("osu.ppy.sh");
 // the thing that continues on and on till all metadata entries are read.
 // this will come after the amount of metadata entries.
 
-// type*5 len beatmap id
+// type len beatmap id
 // 09 00  07  31 33 34 36 38 33 30
-// 0          4?
+// 0      2   3
 
-// type*5 len beatmap id
+// type   len artist name
 // 01 00  0B  41 72 69 61 62 6C 27 65 79 65 53
-// 0          4?
+// 0      2   3
+
+// type   len mapset creator
+// 02 00  0A  50 61 74 63 68 75 63 68 61 6E
+// 0      2   3
+
+// type   what the     song title
+// 04 00  00 00 00 0A  41 73 70 68 6F 64 65 6C 6F 73
+// 0      2            6 (what)
 
 //// SIDENOTES:
 // *1 = magic number hex, primarily known in binary formats as an identifier string. this will be "EC 48 4F".
@@ -117,30 +152,10 @@ const router = new Router().domain("osu.ppy.sh");
 // *4 = this tells us that there are 8 metadata entries, and that we'll need to parse them.
 // *5 = the type, here's the enum.
 // enum: 
-//     Title, // 1
-//     Artist, // 2
-//     Creator, // 3
-//     Version, // 4
-//     Source, // 5
-//     Tags, // 6
-//     VideoDataOffset, // 7
-//     VideoDataLength, // 8
-//     VideoHash, // 9
-//     BeatmapSetID, // 10
-//     Genre, // 11
-//     Language, // 12
-//     TitleUnicode, // 13
-//     ArtistUnicode, // 14
-//     Unknown = 9999, // 9999
-//     Difficulty, // 15
-//     PreviewTime, // 16
-//     ArtistFullName, // 17
-//     ArtistTwitter, // 18
-//     SourceUnicode, // 19
-//     ArtistUrl, // 20
-//     Revision, // 21
-//     PackId // 22
-// }
+// artist name: 01
+// mapset creator: 02
+// song title: 04
+// beatmap id: 09
 
 // #TODO: beatmap submission.
 
