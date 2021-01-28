@@ -1,4 +1,4 @@
-# Amaterasu
+![](https://i.imgur.com/T6sOvHq.png)
 The official repository for the osu!bancho Server that powers the [osu!katagiri](https://osu.katagiri.ml) private server. This was built with specifically osu!katagiri in mind, but other use cases may apply. As such, we wont be handling support for its setup or usage.
 
 ## Requirements and Prerequisites
