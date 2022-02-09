@@ -5,7 +5,21 @@ const { Hash } = require('../../src/util/Util');
 const Util = require('../../src/util/Util');
 
 // Router
-const router = new Router().domain("osu.ppy.sh");
+const router = new Router().domain("osu.katagiri.io");
+
+// User Data
+const Systems = [
+    "vn",
+    "rx",
+    "ap"
+];
+
+const Modes = [
+    "std",
+    "taiko",
+    "ctb",
+    "mania"
+]
 
 // #POST [/users]
 router.handle("/users", ["POST"], async (req, res) => {
@@ -25,12 +39,12 @@ router.handle("/users", ["POST"], async (req, res) => {
 
     // we will be checking if the username and/ or email is taken.
     let [users, _] = await glob.db.execute(`
-    SELECT * FROM users
+    SELECT id FROM users
     WHERE username = ?
     `, [ req.body["user[username]"] ]);
 
     let [emails, __] = await glob.db.execute(`
-    SELECT * FROM users
+    SELECT id FROM users
     WHERE email = ?
     `, [ req.body["user[user_email]"] ]);
 
@@ -58,6 +72,7 @@ router.handle("/users", ["POST"], async (req, res) => {
     if (req.body["check"] == "0") {
         let hash = Hash.encrypt(Hash.md5(req.body["user[password]"]));
         let safe_username = req.body["user[username]"].replace(" ", "_").toLowerCase();
+        let now = Date.now()
 
         // insert user into database.
         await glob.db.execute(`
@@ -72,16 +87,19 @@ router.handle("/users", ["POST"], async (req, res) => {
              \`roles\`, 
              \`password_version\`
             ) 
-        VALUES (NULL, ?, ?, ?, ?, ?, ?, '18', '1')
-        `, [ req.body["user[username]"], safe_username, hash, req.body["user[user_email]"], Util.toUnix(Date.now()), Util.toUnix(Date.now()) ]);
+        VALUES (NULL, ?, ?, ?, ?, ?, ?, '1', '1')
+        `, [ req.body["user[username]"], safe_username, hash, req.body["user[user_email]"], now, now ]);
 
         // get newly created user.
         var [user, ___] = await glob.db.execute("SELECT id FROM users WHERE safe_username = ?", [safe_username]);
 
         // insert scores.
-        await glob.db.execute("INSERT INTO userstats_vn (id) VALUES (?)", [user[0].id]);
-        await glob.db.execute("INSERT INTO userstats_rx (id) VALUES (?)", [user[0].id]);
-        await glob.db.execute("INSERT INTO userstats_ap (id) VALUES (?)", [user[0].id]);
+        for (let system in Systems) {
+            // get all modes
+            for (let mode in Modes) {
+                await glob.db.execute("INSERT INTO stats (id, mode, system) VALUES (?, ?, ?)", [user[0].id, mode, system]);
+            }
+        }
     }
 
     // send okay

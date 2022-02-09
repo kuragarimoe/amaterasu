@@ -45,8 +45,8 @@ function toObject(usp) {
 
     for (let [name, value] of usp) {
         // types
-        if (/[^a-zA-Z]/.test(value)) { // number
-            if (!isNaN(parseInt(value))) {// second verification
+        if (/^[a-z0-9]+$/i.test(value)) { // number
+            if (!isNaN(Number(value))) {// second verification
                 res[name] = parseInt(value);
             } else res[name] = value;
         } else res[name] = value;
