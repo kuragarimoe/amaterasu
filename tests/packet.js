@@ -1,22 +1,40 @@
-const { Uint64LE } = require("int64-buffer");
 const Packet = require("../src/bancho/Packet");
-const NanoTimer = require('nanotimer');
-const timerA = new NanoTimer();
-const timerB = new NanoTimer();
 const { Type } = require("../src/util/Constants");
 
 const notif = require("../src/bancho/packets/notification")
 let example = notif("Hello, world!");
 
+console.log(example)
+
 /// TIMERS ///
+let readTotal = 0n;
+let writeTotal = 0n;
+let iterations = 100n;
+
 
 console.log("PACKET READ TEST");
-let readTime = timerA.time(read, '', 'm');
-console.log("\nRead Time: " + readTime + "ms");
+for (let i = 0; i < iterations; i++) {
+    let start = process.hrtime.bigint();
+    read();
+    readTotal += process.hrtime.bigint() - start;
+
+    if (i == 1) {
+        console.log("\nFirst Read Time: " + (process.hrtime.bigint() - start) + "ns");
+    }
+}
+console.log("Read Time Average: " + (readTotal / iterations) + "ns; " + `${iterations} iterations`);
 
 console.log("\nPACKET WRITE TEST");
-let writeTime = timerB.time(write, '', 'm');
-console.log("\nWrite Time: " + writeTime + "ms");
+for (let i = 0; i < iterations; i++) {
+    let start = process.hrtime.bigint();
+    write();
+    writeTotal += process.hrtime.bigint() - start;
+
+    if (i == 1) {
+        console.log("\nFirst Write Time: " + (process.hrtime.bigint() - start) + "ns");
+    }
+}
+console.log("Write Time Average: " + (writeTotal / iterations) + "ns; " + `${iterations} iterations`);
 
 /// READ ///
 
@@ -26,10 +44,6 @@ function read() {
 
     // this is a type 24 buffer, so its a notification; read string
     let string = packet.read(Type.String);
-
-    // done
-    console.log("Read String:", string)
-    console.log("Memory Usage: " + (Math.round((process.memoryUsage().heapUsed / 1024 / 1024) * 100) / 100) + "MB");
 }
 
 /// WRITE ///
@@ -46,10 +60,4 @@ function write() {
 
     // pack
     let packed = create.pack();
-
-    // done
-    console.log("Example Buffer:", example)
-    console.log("Packet:        ", create.toString());
-    console.log("Created Buffer:", packed);
-    console.log("Memory Usage: " + (Math.round((process.memoryUsage().heapUsed / 1024 / 1024) * 100) / 100) + "MB");
 }
