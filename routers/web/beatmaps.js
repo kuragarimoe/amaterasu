@@ -2,7 +2,7 @@
 const Router = require("../../src/http/Router");
 
 // Router
-const router = new Router().domain("osu.ppy.sh");
+const router = new Router().domain("osu.katagiri.io");
 
 /// BEATMAP SUBMISSION ///
 
@@ -34,6 +34,11 @@ const router = new Router().domain("osu.ppy.sh");
 // 4: unsure, but it is used
 // 5: authorization failed, or punished
 // 6: submission limit
+
+
+router.handle("/web/osu-osz2-bmsubmit-getid.php", ["GET"], (req, res) => {
+    
+})
 
 // [/web/osu-osz2-bmsubmit-upload.php]: [POST]
 // the beatmap upload, where the osz is submitted

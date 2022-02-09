@@ -1,6 +1,6 @@
 // modules
 const fs = require("fs");
-
+const Package = require("../../package.json");
 
 const Packet = require("../../src/bancho/Packet");
 const Packets = require("../../src/bancho/Packets");
@@ -9,7 +9,7 @@ const Router = require("../../src/http/Router");
 const RoleMap = require("../../src/structures/bancho/RoleMap");
 const { Hash } = require("../../src/util/Util");
 const Player = require("../../src/structures/bancho/Player");
-const router = new Router().domain(/^c[e0-9]?(\.ppy\.sh)$/);
+const router = new Router().domain(/^c[e0-9]?(\.katagiri\.io)$/);
 
 // exempt packets
 const EXEMPT = [4];
@@ -24,8 +24,8 @@ router.handle("/", ["POST", "GET"], async (req, res) => {
     // handle browser requests very "dangerously"
     if (!req.headers["user-agent"] || req.headers["user-agent"] != "osu!") {
         // request from a browser
-        let render = fs.readFileSync(__dirname + "/../../.data/home", "utf-8");
-        let regex = /\{(.*)\}/g;
+        let render = fs.readFileSync(__dirname + "/../../.data/home.html", "utf-8");
+        let regex = /\{(.*)\}/;
         let e = regex.exec(render);
 
         // read from home and parse data
@@ -34,7 +34,7 @@ router.handle("/", ["POST", "GET"], async (req, res) => {
                 return eval(`${e[1]}`)
             };
 
-            render = render.replace(e[0], danger.call(glob))
+            render = render.replace(e[0], danger.call(glob));
             e = regex.exec(render);
         }
 
@@ -128,7 +128,7 @@ async function login(data, ip) {
 
     // efficient checking.
     if (scrypt.get(password_hash)) {
-        if (!scrypt.get(password_hash).value == password_hash) {
+        if (!scrypt.get(password_hash) == password_hash) {
             return [glob.packets.login(-1), "0"];
         }
     } else {
@@ -187,7 +187,7 @@ async function login(data, ip) {
 
     // enqueue players to us
     for (let p of glob.players.values()) {
-        if (p.id !== 1) { // ignore orin lol
+        if (p.id !== 1) { // ignore the bot lol
             p.enqueue(user_data)
         }
 

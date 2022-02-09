@@ -4,7 +4,7 @@ const mime = require('mime/lite');
 const fs = require("fs");
 
 // Router
-const router = new Router().domain("a.ppy.sh");
+const router = new Router().domain("a.katagiri.io");
 
 router.handle(/\/[a-zA-Z0-9](?:.*)?/, ["GET"], async (req, res) => {
     let path = /\/([a-zA-Z0-9])(?:.*)?/.exec(req.path);

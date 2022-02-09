@@ -5,7 +5,7 @@ const { Hash } = require('../../src/util/Util');
 const Util = require('../../src/util/Util');
 
 // Router
-const router = new Router().domain("osu.ppy.sh");
+const router = new Router().domain("osu.katagiri.io");
 
 // #POST [/web/osu-error.php]
 router.handle("/web/osu-error.php", ["POST"], async (req, res) => {
