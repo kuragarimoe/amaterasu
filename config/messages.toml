@@ -1,0 +1,7 @@
+###
+# amaterasu messages
+###
+
+# server based messages
+[server]
+on_restart = ""
