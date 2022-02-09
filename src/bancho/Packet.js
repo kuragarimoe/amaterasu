@@ -10,7 +10,7 @@ class Packet {
 
         // read the ID from the given buffer, if any
         if (buffer) {
-            this._id = parseInt(this.buffer.slice(0, 2).reverse().toString("hex"), 16); // first 2 bytes is the ID
+            this._id = buffer.readInt16LE(0);
             this.buffer = buffer.slice(7); // create a buffer from the rest of the buffer
         }
     }
@@ -47,13 +47,9 @@ class Packet {
                 resp = Buffer.from([0]);
             } else {
                 let data_buffer = Buffer.from(data, "utf-8"); // data to a utf8 buffer
-                let buffer = Buffer.alloc(1); // make the base of the uffer
-                buffer.writeUInt8(0x0B, 0); // write base byte
+                let length = Buffer.from(writeULEB128(data_buffer.length)); // length buffer
 
-                // length buffer
-                let length = Buffer.from(writeULEB128(data_buffer.length));
-
-                resp = Buffer.concat([buffer, length, data_buffer]);
+                resp = Buffer.concat([Buffer.from([0x0B]), length, data_buffer]);
             }
         } else {
             // everything else
@@ -88,13 +84,6 @@ class Packet {
      * @param {Number|Type} type The type to read, or the size to read.
      */
     read(type) {
-        if (!typeof type == "number") { // is not a number
-            if (!Type[type])
-                throw new RangeError("The given type is not a very valid type.");
-
-            type = Type[type];
-        }
-
         let data = null;
 
         // special case for strings
@@ -130,7 +119,6 @@ class Packet {
         startBuffer.writeInt32LE(this.length, 3);
 
         // return full buffer
-        glob.handled.push({ id: _id })
         return Buffer.concat([startBuffer, this.buffer]);
     }
 

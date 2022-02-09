@@ -11,14 +11,14 @@ module.exports.stats = (player) => {
     if (player.bot) { // bot accounts are special
         packet.write(player.id, Type.Int)
             .write(4, Type.Byte)
-            .write("some content...", Type.String)
+            .write("", Type.String)
             .write("", Type.String) 
             .write(0, Type.Int)
             .write(0, Type.Byte)
             .write(0, Type.Int)
             .write(0, Type.Long)
             .write(0, Type.Float)
-            .write(0, Type.Int)
+            .write(1, Type.Int)
             .write(0, Type.Long)
             .write(0, Type.Int)
             .write(0, Type.Short);
@@ -30,18 +30,22 @@ module.exports.stats = (player) => {
     // player stats
     let stats = player.stats();
 
+    if (!stats) {
+        return;
+    }
+
     // write data
     packet.write(player.id, Type.Int) // player id
         .write(player.status.action, Type.Byte) // what is the player doing?
-        .write(player.status.info, Type.String) // ???
+        .write(player.status.info, Type.String) // action info text
         .write(player.status.map.md5, Type.String) // md5 of the current map
         .write(player.status.mods || 0, Type.Int) // user's mod values
         .write(player.status.mode, Type.Byte) // the mode the user is playing right now
         .write(player.status.map.id, Type.Int) // map id
-        .write(stats.rscore, Type.Long) // ranked score
+        .write(stats.ranked_score, Type.Long) // ranked score
         .write(stats.acc, Type.Float) // accuracy
         .write(stats.plays, Type.Int) // play count
-        .write(stats.tscore, Type.Long) // total score
+        .write(stats.total_score, Type.Long) // total score
         .write(player.rank || 0, Type.Int) // player rank
         .write(stats.pp || 0, Type.Short); // pp; why is pp a short?
 
