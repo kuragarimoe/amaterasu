@@ -38,7 +38,7 @@ class Cache {
     }
 
     get(key) {
-        return this.pairs.get(key);
+        return this.pairs.get(key)?.value;
     }
 
     set(key, value, expiry = 0) {

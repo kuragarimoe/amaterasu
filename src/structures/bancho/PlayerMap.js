@@ -1,6 +1,9 @@
-class PlayerMap extends Map {
+const Collection = require("../../util/Collection");
+const Player = require("./Player");
+
+class PlayerMap extends Collection {
     constructor() {
-        super();
+        super(Player);
     }
 
     enqueue(packet) {
@@ -26,7 +29,7 @@ class PlayerMap extends Map {
         if (!user) // no user online
             return null;
 
-        if (scrypt.get(pw).value == pw)
+        if (scrypt.get(pw) == pw)
             return user;
     }
 

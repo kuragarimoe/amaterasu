@@ -290,25 +290,21 @@ class Player {
      * Gets the statistics for the player from the database and properly assigns them.
      */
     async get_stats() {
-        for (let system of Systems) {
+        for (let system in Systems) {
             // setup system
-            this._stats[system] = {};
+            this._stats[Systems[system]] = {};
 
             // get all modes
-            for (let mode of Modes) {
+            for (let mode in Modes) {
                 let data = await glob.db.fetch(`
                     SELECT
-                        ranked_score_${mode} as rscore,
-                        playcount_${mode} as plays,
-                        ranked_score_${mode} as tscore,
-                        avg_accuracy_${mode} as acc,
-                        pp_${mode} as pp
-                    FROM userstats_${system}
-                    WHERE id = ?
-                `, [this.id]);
+                        *
+                    FROM stats
+                    WHERE id = ? AND mode = ? AND system = ?
+                `, [this.id, mode, system]);
                 
                 // set data
-                this._stats[system][mode] = data;
+                this._stats[Systems[system]][Modes[mode]] = data;
             }
         }
     }
