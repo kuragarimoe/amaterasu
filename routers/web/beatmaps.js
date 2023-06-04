@@ -31,7 +31,7 @@ const router = new Router().domain("osu.katagiri.io");
 // common error codes:
 // 1: the submitter doesn't own the map
 // 3: the map is ranked
-// 4: unsure, but it is used
+// 4: unsure, but it is used UPDATE 05/06/2023, error code 4 is returned when the status is less then -1
 // 5: authorization failed, or punished
 // 6: submission limit
 
@@ -59,7 +59,6 @@ router.handle("/web/osu-osz2-bmsubmit-getid.php", ["GET"], (req, res) => {
 // common error codes:
 // 1: the submitter doesn't own the map
 // 3: the map is ranked
-// 4: unsure, but it is used
 // 5: authorization failed, or punished
 // 6: submission limit
 
